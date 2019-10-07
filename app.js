@@ -10,6 +10,7 @@ let localStrategy = require("passport-local");
 let passLocMon = require("passport-local-mongoose");
 let methodOverride = require("method-override");
 let User = require("./models/user");
+let Flash = require("connect-flash");
 
 // Stylesheet not connected. Refer to last video of adding comments
 
@@ -24,6 +25,7 @@ app.use(bodyParser.urlencoded({extended: true})); // It will help in POST routes
 app.set("view engine", "ejs");
 app.use(express.static(__dirname + "/public")); // To use public directory. __dirname prints CWD.
 app.use(methodOverride("_method")); // Help in using PUT route
+app.use(Flash());
 mongoose.connect("mongodb://localhost/yelp_camp");
 // seedDB(); // seed the database
 
@@ -42,9 +44,11 @@ passport.use(new localStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
-// ======= Will make user available to all pages =======
+// ======= Will make following available to all pages =======
 app.use(function(req, res, next){
     res.locals.currentUser = req.user;
+    res.locals.error = req.flash("error");
+    res.locals.success = req.flash("success");
     next();
 });
 

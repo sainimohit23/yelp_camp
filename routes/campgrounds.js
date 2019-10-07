@@ -3,7 +3,7 @@
 // =================
 let router = require("express").Router();
 let Campground =require("../models/campgrounds");
-
+let middlewareObj = require("../middlewares") // Program will read index.js by default
 
 // camp route
 router.get("/campgrounds", (req, res)=>{
@@ -45,7 +45,7 @@ router.post("/campgrounds", function(req, res){
 
 
 // add camp route
-router.get("/campgrounds/new", isLoggedIn, function(req, res){
+router.get("/campgrounds/new", middlewareObj.isLoggedIn, function(req, res){
     res.render("campgrounds/new"); 
  });
 
@@ -63,7 +63,7 @@ router.get("/campgrounds/:id", function(req, res){
 });
 
 // ============= EDIT AND UPDATE ==============
-router.get("/campgrounds/:id/edit", checkCampgroundOwnership, (req, res)=>{
+router.get("/campgrounds/:id/edit", middlewareObj.checkCampgroundOwnership, (req, res)=>{
     Campground.findById(req.params.id, (err, foundCampground)=>{
         if(err){ 
             console.log(err);
@@ -75,7 +75,7 @@ router.get("/campgrounds/:id/edit", checkCampgroundOwnership, (req, res)=>{
     });
 });
 
-router.put("/campgrounds/:id", checkCampgroundOwnership, (req, res)=>{
+router.put("/campgrounds/:id", middlewareObj.checkCampgroundOwnership, (req, res)=>{
     // console.log("I'm here");
     Campground.findByIdAndUpdate(req.params.id, req.body.campground, (err, foundCamp)=>{
         if(err){
@@ -89,7 +89,7 @@ router.put("/campgrounds/:id", checkCampgroundOwnership, (req, res)=>{
     });
 });
 
-router.delete("/campgrounds/:id", checkCampgroundOwnership, function(req, res){
+router.delete("/campgrounds/:id", middlewareObj.checkCampgroundOwnership, function(req, res){
     Campground.findByIdAndRemove(req.params.id, function(err){
        if(err){
            res.redirect("/campgrounds");
@@ -98,34 +98,5 @@ router.delete("/campgrounds/:id", checkCampgroundOwnership, function(req, res){
        }
     });
  });
-
-
-function isLoggedIn(req, res, next){
-    if(req.isAuthenticated()){
-        return next();
-    }
-    res.redirect("/login");
-}
-
-// This function is for authorization, which is different from authentication.
-function checkCampgroundOwnership(req, res, next){
-    if(req.isAuthenticated()){
-        Campground.findById(req.params.id, (err, foundCamp)=>{
-            if(err){
-                console.log(err);
-                res.redirect("back");
-            }else{
-                if(foundCamp.author.id.equals(req.user._id)){ // we can't use === here because one is object and other is string
-                    next();
-                }
-                else{
-                    res.redirect("back");
-                }
-            }
-        });
-    }else{
-        res.redirect("back");
-    }
-}
 
 module.exports = router;
