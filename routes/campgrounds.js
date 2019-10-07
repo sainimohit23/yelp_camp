@@ -25,12 +25,13 @@ router.post("/campgrounds", function(req, res){
     let name = req.body.name;
     let image = req.body.image;
     let desc = req.body.desc;
+    let price = req.body.price;
     let author = {
         id: req.user._id,
         name: req.user.username
     }
-    console.log(author);
-    let newCampground = {name: name, image: image, description:desc, author:author};
+    console.log(req.body.price);
+    let newCampground = {name: name, image: image, description:desc, author:author, price:price};
     
     Campground.create(newCampground,(err, data)=>{
         if(err){
@@ -57,6 +58,7 @@ router.get("/campgrounds/:id", function(req, res){
             console.log("error while showing more info");
         }
         else{
+            // console.log(data.price);
             res.render("campgrounds/show",{ campground:data});
         }
     });
